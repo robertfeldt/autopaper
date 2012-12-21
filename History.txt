@@ -1,0 +1,6 @@
+=== 1.0.0 / 2012-12-21
+
+* Started mobing things from various scripts related to latex paper management into this new Ruby gem. Will try to make it generally useful for students and colleagues...
+
+  * Birthday!
+

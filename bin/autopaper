@@ -1,0 +1,53 @@
+#!/usr/bin/env ruby
+# AutoPaper script for managing and setting up research papers written with Latex/Bibtex/R and similar tools.
+# Makes it easy to change formatting between different journal/conference format etc.
+
+require 'rubygems'
+require 'thor'
+
+class AutoPaper < Thor
+  no_tasks do
+    def psys(str)
+      STDOUT.puts str
+      STDOUT.flush
+      system str
+    end
+
+    def get_latex_file_and_rename_as(url, targetFileName, author = "feldt")
+      year = Time.now.strftime("%Y")
+      filename = "#{author}_#{year}_#{targetFileName}.tex"
+      psys "wget -O #{filename} #{url}"
+      filename
+    end
+
+    def copy_common_file(filename)
+      # TBD
+    end
+
+    def copy_common_files(*filenames)
+      filenames.each {|fn| copy_common_file(fn)}
+    end
+  end
+
+  ForumSpecifics = {
+    :acm_sig => :acm_sig_tight,
+    :acm_sig_tight => {
+      :latex_cls_file => "http://www.acm.org/sigs/publications/sig-alternate.cls",
+      :latex_tex_example => "http://www.acm.org/sigs/publications/sig-alternate.tex"
+      # Author format for acm:
+      # 
+    }
+  }
+
+  desc "setup NAME", "Setup a new project with main file NAME. Optionally you can specify the target publication forum and the main author last name."
+  method_option :forum, :type => :string, :default => "acm_sig_tight"   # The publication forum
+  method_option :author, :type => :string, :default => "feldt"   # The publication forum
+  def setup(name)
+    desc = ForumSpecifics[options[:forum].to_sym]
+    psys "wget #{desc[:latex_cls_file]}"
+    texfile = get_latex_file_and_rename_as(desc[:latex_tex_example], name, author = options[:author])
+    copy_common_files "Rakefile"
+  end
+end
+
+AutoPaper.start
